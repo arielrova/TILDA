@@ -1,0 +1,18 @@
+      <molekyl> ::= <atom> | <atom><num>
+      <atom>  ::= <LETTER> | <LETTER><letter>
+      <LETTER>::= A | B | C | ... | Z
+      <letter>::= a | b | c | ... | z
+      <num>   ::= 2 | 3 | 4 | ...
+
+      Vi vill att funktionerna ska implementara ovanstående syntaxregler:
+
+      Namn på funktionerna:
+      readMolecule() - Ska kolla att molekyl-formeln består av ett atom-namn eller ett atom-namn och atom-nummer
+
+      readAtom() - Ska kolla att atom-formeln består av antingen stor bokstav eller stor bokstav och en liten bokstav
+
+      readCapitalLetters() - ska kolla att inkommande data bara består av stora bokstäver från A-Z
+
+      readLowerCaseLetters() - ska kolla att inkommande data bara består av små bokstäver från a-z
+
+      readNumber() - ska kolla att inkommande data bara består av ett tal 2 eller uppåt/högre
