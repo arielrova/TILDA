@@ -55,32 +55,40 @@ def readGroup(q):
 # <atom>  ::= <LETTER> | <LETTER><letter>
 def readAtom(q): 
     characterList = []
+    first = q.currentQ()
     second = q.peek()
+    print(first)
+    print(second)
 
     # Fall 1 - en STOR bokstav
-    if (readCapitalLetters(q.currentQ())):
-        characterList.append(q.currentQ())
+    if (readCapitalLetters(first)):
+        characterList.append(first)
         q.dequeue()
     else:
-        raise Syntaxfel(q.currentQ() + "Är inte en stor bokstav")
+        raise Syntaxfel(first + "Är inte en stor bokstav")
 
-
-    # Fall 2 - En STOR bokstav följs av en liten bokstav
     if not q.isEmpty():
-        if(second.isdigit() or second == ")"):
-            #
-            pass
-        elif(readLowerCaseLetters(second)):
+        # Fall 2 - En STOR bokstav följs av en liten bokstav
+        if(readLowerCaseLetters(second)):
             q.dequeue()   
             characterList.append(second)
+
+        # Undantagsfall:
+        elif(second.isdigit() or second == ")"):
+            # Om peek är en siffra eller slutparantes vill vi
+            # Hantera det i readGroup och inte här. Denna check borde
+            # flyttas ut ur readAtom. 
+            pass
         elif(readCapitalLetters(second)):
+            # Om peek är en stor bokstav så har vi en sammansättning
+            # t.ex. COOH, denna ska läsas atom för atom så vi skickar bara vidare q
             pass
         else:
-            raise Syntaxfel(q.currentQ() + " Är inte en liten bokstav")
+            raise Syntaxfel(first + " Är inte en liten bokstav")
 
-        atom = ''.join(characterList)
-        if not (isAtom(atom)):
-            raise Syntaxfel(atom + " Är inte en TRUE atom")
+    atom = ''.join(characterList)
+    if not (isAtom(atom)):
+        raise Syntaxfel(atom + " Är inte en TRUE atom")
     return
 
 #<LETTER>::= A | B | C | ... | Z
@@ -99,9 +107,6 @@ def readNumber(number):
     if number >=2:
         return number
 
-# Q är en Linked Queue. 
-# Hantering för om tecken är siffra, så att det kan stå 23.
-# Lägg till siffror till queuen.
 def storeFormula(formel):
     q = LinkedQ()
     numlist = []
