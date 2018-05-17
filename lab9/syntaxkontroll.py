@@ -2,21 +2,19 @@
 
 from linkedQFile import LinkedQ
 
+atoms = ["H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne", "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar", "K", "Ca", "Sc", "Ti", "V", "Cr",
+"Mn", "Fe", "Co", "Ni", "Cu", "Zn", "Ga", "Ge", "As", "Se", "Br", "Kr", "Rb", "Sr", "Y", "Zr", "Nb", "Mo", "Tc", "Ru", "Rh", "Pd", "Ag", "Cd",
+"In", "Sn", "Sb", "Te", "I", "Xe", "Cs", "Ba", "La", "Ce", "Pr", "Nd", "Pm", "Sm", "Eu", "Gd", "Tb", "Dy", "Ho", "Er", "Tm", "Yb", "Lu", "Hf",
+"Ta", "W", "Re", "Os", "Ir", "Pt", "Au", "Hg", "Tl", "Pb", "Bi", "Po", "At", "Rn", "Fr", "Ra", "Ac", "Th", "Pa", "U", "Np", "Pu", "Am", "Cm",
+"Bk", "Cf", "Es", "Fm", "Md", "No", "Lr", "Rf", "Db", "Sg", "Bh", "Hs", "Mt", "Ds", "Rg", "Cn", "Fl", "Lv"]
+
 class Syntaxfel(Exception):
     pass
 
-# Tar emot listan, q, Kollar molekylen
-# <mol>   ::= <group> | <group><mol>
-def readMolecule(q, open = False):
-    q.printQueue()
-
-    #Det är klart - Returnera till main
+# <mol> ::= <group> | <group><mol>
+def readMolecule(q):
     if q.isEmpty():
-        if(open == False):
-            return
-        else:
-            raise Syntaxfel(letter + " Det har gått åt helvete")
-
+        return
     else:
         #Fall 1 - Grupp
         readGroup(q)
@@ -26,39 +24,51 @@ def readMolecule(q, open = False):
 # <group> ::= <atom> | <atom><num> | (<mol>) <num>
 def readGroup(q):
     firstValue = q.currentQ()
+
+    #Fall 0 - Parantesgrupp börjar
     if (firstValue == "("):
         q.dequeue()
-        readMolecule(q, True)
+        return readMolecule(q)
 
-    # Fall 1: Enkel atom
+    #Fall 3 - Molekyl med nummer efter
+    if(firstValue == ")"):
+        q.dequeue()
+        if(q.currentQ().isdigit()):
+            if(readNumber(q.currentQ())):
+                q.dequeue()
+                return readMolecule(q)
+            else: 
+                raise Syntaxfel("Felaktig siffra i slutet av...")
+
+    # Fall 1 - Enkel atom
     readAtom(q)
 
-    #Fall 2-3: Atom eller molekyl med nummer efter
+    # Fall 2 - Atom med nummer efter
     if not q.isEmpty():
         qnu = q.currentQ()
         if(qnu.isdigit()):
             readNumber(qnu)
             q.dequeue()
 
-    #Fall 3: Ny molekyl
     return
-
-
-   # readMolecule(q)
 
 # <atom>  ::= <LETTER> | <LETTER><letter>
 def readAtom(q): 
     characterList = []
+    second = q.peek()
 
     # Fall 1 - en STOR bokstav
-    first = readCapitalLetters(q.currentQ())
-    second = q.peek()
-    q.dequeue()
-    characterList.append(first)
+    if (readCapitalLetters(q.currentQ())):
+        characterList.append(q.currentQ())
+        q.dequeue()
+    else:
+        raise Syntaxfel(q.currentQ() + "Är inte en stor bokstav")
 
-    # Fall 2 - En liten bokstav följer
+
+    # Fall 2 - En STOR bokstav följs av en liten bokstav
     if not q.isEmpty():
-        if(second.isdigit()):
+        if(second.isdigit() or second == ")"):
+            #
             pass
         elif(readLowerCaseLetters(second)):
             q.dequeue()   
@@ -67,29 +77,27 @@ def readAtom(q):
             pass
         else:
             raise Syntaxfel(q.currentQ() + " Är inte en liten bokstav")
+
         atom = ''.join(characterList)
+        if not (isAtom(atom)):
+            raise Syntaxfel(atom + " Är inte en TRUE atom")
     return
 
-def readCapitalLetters(letter): #<LETTER>::= A | B | C | ... | Z
+#<LETTER>::= A | B | C | ... | Z
+def readCapitalLetters(letter):
     if letter.isupper():
         return letter
-    raise Syntaxfel(letter + " Är inte stor bokstav")
 
-def readLowerCaseLetters(letter): #<letter>::= a | b | c | ... | z
+#<letter>::= a | b | c | ... | z
+def readLowerCaseLetters(letter): 
     if letter.islower():
         return letter
 
-def readNumber(number): #<num>::= 2 | 3 | 4 | ...
+#<num>::= 2 | 3 | 4 | ...
+def readNumber(number): 
     number = int(number)
     if number >=2:
-        return
-    raise Syntaxfel(number + " Är inte en siffra")
-
-# def printQueue(q):
-#     while not q.isEmpty():
-#         word = q.dequeue()
-#         print(word, end = " ")
-#     print()
+        return number
 
 # Q är en Linked Queue. 
 # Hantering för om tecken är siffra, så att det kan stå 23.
@@ -113,6 +121,11 @@ def storeFormula(formel):
         q.enqueue(num_node)
 
     return q
+
+def isAtom(atom):
+    if(atom in atoms):
+        return True
+
 
 # <formel> ::= <molekyl>
 def kollaSyntax(formel):
