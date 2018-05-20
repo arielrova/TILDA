@@ -19,40 +19,42 @@ class Syntaxfel(Exception):
 
 
 # <mol> ::= <group> | <group><mol>
-def readMolecule(q, n):
-    print(n)
-    q.printQueue()
+def readMolecule(q):
+    print("Jag börjar en ny loop")
 
     if q.isEmpty():
         return
     else:
         first = q.currentQ()
-
         # Fall 1 - Gruppstart
         if (first == "("):
-            parenthesisErrorHandling(q, n)
             q.dequeue()
-            return readMolecule(q, n + 1)
+            readGroup(q)
+            print("Hejhejhej!")
+            q.printQueue()
+            if(q.currentQ() == ")"):
+                q.dequeue()
+                raise Syntaxfel("Felaktig gruppstart vid radslutet " + q.remainderString())
 
         # Fall 1 - Gruppslut
         if(first == ")"):
-            parenthesisErrorHandling(q, n)
+            # parenthesisErrorHandling(q)
             q.dequeue()
             if(q.currentQ().isdigit()):
                 if(readNumber(q.currentQ())):
                     q.dequeue()
-                    return readMolecule(q, n - 1)
+                    return readMolecule(q)
                 else:
                     raise Syntaxfel("Felaktig siffra i slutet av...")
     readGroup(q)
-    readMolecule(q, n)
+    readMolecule(q)
 
 
-def parenthesisErrorHandling(q, n):
-    if(n < 0):
-        raise Syntaxfel("Felaktig gruppstart vid radslutet " + q.remainderString())
-    elif(q.isEmpty() and n != 0):
-        raise Syntaxfel("Saknad högerparentes vid radslutet")
+# def parenthesisErrorHandling(q):
+#     # if(n < 0):
+#     raise Syntaxfel("Felaktig gruppstart vid radslutet " + q.remainderString())
+#     # elif(q.isEmpty() and n != 0):
+#     #     raise Syntaxfel("Saknad högerparentes vid radslutet")
 
 
 # <group> ::= <atom> | <atom><num> | (<mol>) <num>
@@ -61,17 +63,24 @@ def readGroup(q):
     # Fall 1 - Enkel atom
     readAtom(q)
 
+    print("Efter read Atom: ")
+    q.printQueue()
     # Fall 2&3 - Atom eller grupp med nummer efter
-    if not q.isEmpty():
-        if(q.currentQ().isdigit()):
-            readNumber(q.currentQ())
-            q.dequeue()
+    if(q.currentQ() == ")"):
+        q.dequeue()
+        q.printQueue()
+        if not q.isEmpty():
+            if(q.currentQ().isdigit()):
+                readNumber(q.currentQ())
+                q.dequeue()
+                q.printQueue()
 
     return
 
 
 # <atom>  ::= <LETTER> | <LETTER><letter>
 def readAtom(q):
+    q.printQueue()
     characterList = []
     first = q.currentQ()
     second = q.peek()
@@ -80,6 +89,7 @@ def readAtom(q):
     if (readCapitalLetters(first)):
         characterList.append(first)
         q.dequeue()
+        q.printQueue()
     else:
         raise Syntaxfel(first + "Är inte en stor bokstav")
 
@@ -88,13 +98,13 @@ def readAtom(q):
         if(readLowerCaseLetters(second)):
             q.dequeue()
             characterList.append(second)
+            q.printQueue()
 
         # Undantagsfall:
-        elif(second.isdigit() or second == ")" or second == "("):
-            # Om peek är en siffra eller slutparantes vill vi
-            # Hantera det i readGroup och inte här. 
-            pass
+        elif(q.currentQ().isdigit()):
+            q.printQueue()
         elif(readCapitalLetters(second)):
+            q.printQueue()
             # Om peek är en stor bokstav så har vi en sammansättning
             # t.ex. COOH, denna ska läsas atom för atom så vi
             # skickar bara vidare q.
@@ -157,7 +167,7 @@ def isAtom(atom):
 def kollaSyntax(formel):
     q = storeFormula(formel)
     try:
-        readMolecule(q, 0)
+        readMolecule(q)
         return "Formeln är syntaktiskt korrekt"
     except Syntaxfel as fel:
         return str(fel)
