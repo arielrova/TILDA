@@ -19,7 +19,7 @@ class SyntaxTest(unittest.TestCase):
 
     # En grupp
     def testGroup(self):
-        self.assertEqual(kollaSyntax("Si(C3(COOH)2)4(H2O)7"), "Formeln är syntaktiskt korrekt")
+        self.assertEqual(kollaSyntax("Si(C3(COOH)2)4(H2O)7"), "Formeln är syntaktiskt korrekt") #funkar inte
 
     # En enkel atom
     def unknownAtom(self):
@@ -32,16 +32,16 @@ class SyntaxTest(unittest.TestCase):
         self.assertEqual(kollaSyntax("C(OH4C"), "Saknad högerparentes vid radslutet")
 
     def wrongGroupStart(self):
-        self.assertEqual(kollaSyntax("H2O)Fe"), "Felaktig gruppstart vid radslutet )Fe")
+        self.assertEqual(kollaSyntax("H2O)Fe"), "Felaktig gruppstart vid radslutet )Fe") #borde inte dequa )
 
     def numberIsZero(self):
-        self.assertEqual(kollaSyntax("H0"), "För litet tal vid radslutet")
+        self.assertEqual(kollaSyntax("H0"), "För litet tal vid radslutet") #funkar inte
 
     def numberIsOne(self):
-        self.assertEqual(kollaSyntax("H1C"), "För litet tal vid radslutet C")
+        self.assertEqual(kollaSyntax("H1C"), "För litet tal vid radslutet C") #funkar inte
 
     def numberIsWeird(self):
-        self.assertEqual(kollaSyntax("H02C"), "För litet tal vid radslutet 2C")
+        self.assertEqual(kollaSyntax("H02C"), "För litet tal vid radslutet 2C") #funkar inte
 
     def capitalLetterIsMissing(self):
         self.assertEqual(kollaSyntax("Nacl"), "Saknad stor bokstav vid radslutet cl")

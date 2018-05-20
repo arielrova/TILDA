@@ -21,6 +21,7 @@ class Syntaxfel(Exception):
 # <mol> ::= <group> | <group><mol>
 def readMolecule(q):
     parantes = False
+
     if q.isEmpty():
         return
     else:
@@ -31,10 +32,10 @@ def readMolecule(q):
             q.dequeue()
             readGroup(q)
 
+
         # Fall 1 - Gruppslut
         if(first == ")"):
             if(parantes == True):
-                print("YO!")
                 q.dequeue()
             if(q.currentQ().isdigit()):
                 if(readNumber(q.currentQ())):
@@ -43,20 +44,24 @@ def readMolecule(q):
                 else:
                     raise Syntaxfel("Felaktig siffra i slutet av...")
         else:
+            print(first)
+            print(str(parantes))
+            print('readGROUP')
             readGroup(q)
 
-    print(parantes)
     q.printQueue()
     if not q.isEmpty():
         if(q.currentQ() == ")" and parantes == False):
             raise Syntaxfel("Felaktig gruppstart vid radslutet " + q.remainderString())
+    if (q.isEmpty() and parantes == True):
+        raise Syntaxfel('Saknad högerparentes vid radslutet')
     readMolecule(q)
 
 # <group> ::= <atom> | <atom><num> | (<mol>) <num>
 def readGroup(q):
-
     # Fall 1 - Enkel atom
     readAtom(q)
+
     if(q.isEmpty()):
         return
 
@@ -75,6 +80,8 @@ def readGroup(q):
                 readNumber(q.currentQ())
                 q.dequeue()
 
+            if (readCapitalLetters(q.peek()) or readLowerCaseLetters(q.peek())):
+                raise Syntaxfel('Saknad siffra vid radslutet ' + q.remainderString())
     return
 
 
@@ -87,6 +94,7 @@ def readAtom(q):
     # Fall 1 - en STOR bokstav
     if (readCapitalLetters(first)):
         characterList.append(first)
+        print(str(characterList))
         q.dequeue()
     else:
         raise Syntaxfel("Saknad stor bokstav vid radslutet " + q.remainderString())
@@ -100,7 +108,7 @@ def readAtom(q):
         # Undantagsfall:
         elif(q.currentQ().isdigit()):
             pass
-        elif(readCapitalLetters(q.currentQ())):           
+        elif(readCapitalLetters(q.currentQ())):
             readAtom(q)
         elif(q.currentQ() == "(" or q.currentQ() == ")"):
             pass
