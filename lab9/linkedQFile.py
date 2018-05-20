@@ -60,5 +60,14 @@ class LinkedQ:
             if nextNode == None:
                 print("\n" + "\n")
 
+    def remainderString(self):
+        remainderList = []
+        nextNode = self.__first
+        while(nextNode != None):
+            remainderList.append(nextNode.value)
+            nextNode = nextNode.next
+
+        return ''.join(remainderList)
+
 
 
