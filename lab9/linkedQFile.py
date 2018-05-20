@@ -13,7 +13,6 @@ class LinkedQ:
     def __init__(self):
         self.__first = None
         self.__last = None
-        self.openGroup = False
 
     def enqueue(self, item):
         newnode = Node(item)

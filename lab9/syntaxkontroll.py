@@ -20,24 +20,22 @@ class Syntaxfel(Exception):
 
 # <mol> ::= <group> | <group><mol>
 def readMolecule(q):
-    print("Jag börjar en ny loop")
-
     if q.isEmpty():
         return
     else:
         first = q.currentQ()
         # Fall 1 - Gruppstart
         if (first == "("):
+            parantes = True;
             q.dequeue()
-            readGroup(q)
-            print("Hejhejhej!")
+            print("inne!")
             q.printQueue()
+            readGroup(q)
             if(q.currentQ() == ")"):
-                q.dequeue()
                 raise Syntaxfel("Felaktig gruppstart vid radslutet " + q.remainderString())
 
         # Fall 1 - Gruppslut
-        if(first == ")"):
+        elif(first == ")"):
             # parenthesisErrorHandling(q)
             q.dequeue()
             if(q.currentQ().isdigit()):
@@ -46,16 +44,9 @@ def readMolecule(q):
                     return readMolecule(q)
                 else:
                     raise Syntaxfel("Felaktig siffra i slutet av...")
-    readGroup(q)
+        else:
+            readGroup(q)
     readMolecule(q)
-
-
-# def parenthesisErrorHandling(q):
-#     # if(n < 0):
-#     raise Syntaxfel("Felaktig gruppstart vid radslutet " + q.remainderString())
-#     # elif(q.isEmpty() and n != 0):
-#     #     raise Syntaxfel("Saknad högerparentes vid radslutet")
-
 
 # <group> ::= <atom> | <atom><num> | (<mol>) <num>
 def readGroup(q):
@@ -63,24 +54,26 @@ def readGroup(q):
     # Fall 1 - Enkel atom
     readAtom(q)
 
-    print("Efter read Atom: ")
-    q.printQueue()
-    # Fall 2&3 - Atom eller grupp med nummer efter
+   # Fall 2 - Siffra efter atom
+    if(q.currentQ().isdigit()):
+        readNumber(q.currentQ())
+        q.dequeue()
+
+   # Fall 3 - Atom eller grupp med nummer efter
     if(q.currentQ() == ")"):
         q.dequeue()
-        q.printQueue()
         if not q.isEmpty():
             if(q.currentQ().isdigit()):
                 readNumber(q.currentQ())
                 q.dequeue()
-                q.printQueue()
 
+    print("efter read group")
+    q.printQueue()
     return
 
 
 # <atom>  ::= <LETTER> | <LETTER><letter>
 def readAtom(q):
-    q.printQueue()
     characterList = []
     first = q.currentQ()
     second = q.peek()
@@ -89,28 +82,24 @@ def readAtom(q):
     if (readCapitalLetters(first)):
         characterList.append(first)
         q.dequeue()
-        q.printQueue()
     else:
         raise Syntaxfel(first + "Är inte en stor bokstav")
 
     if not q.isEmpty():
+        q.printQueue()
         # Fall 2 - En STOR bokstav följs av en liten bokstav
         if(readLowerCaseLetters(second)):
             q.dequeue()
             characterList.append(second)
-            q.printQueue()
 
         # Undantagsfall:
         elif(q.currentQ().isdigit()):
-            q.printQueue()
-        elif(readCapitalLetters(second)):
-            q.printQueue()
-            # Om peek är en stor bokstav så har vi en sammansättning
-            # t.ex. COOH, denna ska läsas atom för atom så vi
-            # skickar bara vidare q.
             pass
-        else:
-            raise Syntaxfel(first + " Är inte en liten bokstav")
+        elif(readCapitalLetters(q.currentQ())):
+            print(q.currentQ())            
+            readAtom(q)
+        elif(q.currentQ() == "(" or q.currentQ() == ")"):
+            pass
 
     atom = ''.join(characterList)
     if not (isAtom(atom)):
