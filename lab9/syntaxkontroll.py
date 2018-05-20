@@ -32,9 +32,10 @@ def readMolecule(q):
             readGroup(q)
 
         # Fall 1 - Gruppslut
-        elif(first == ")"):
-            # parenthesisErrorHandling(q)
-            q.dequeue()
+        if(first == ")"):
+            if(parantes == True):
+                print("YO!")
+                q.dequeue()
             if(q.currentQ().isdigit()):
                 if(readNumber(q.currentQ())):
                     q.dequeue()
@@ -44,6 +45,8 @@ def readMolecule(q):
         else:
             readGroup(q)
 
+    print(parantes)
+    q.printQueue()
     if not q.isEmpty():
         if(q.currentQ() == ")" and parantes == False):
             raise Syntaxfel("Felaktig gruppstart vid radslutet " + q.remainderString())
@@ -54,17 +57,21 @@ def readGroup(q):
 
     # Fall 1 - Enkel atom
     readAtom(q)
+    if(q.isEmpty()):
+        return
 
    # Fall 2 - Siffra efter atom
     if(q.currentQ().isdigit()):
         readNumber(q.currentQ())
         q.dequeue()
+        if(q.isEmpty()):
+            return
 
    # Fall 3 - Atom eller grupp med nummer efter
     if(q.currentQ() == ")"):
-        q.dequeue()
         if not q.isEmpty():
             if(q.currentQ().isdigit()):
+                q.dequeue()
                 readNumber(q.currentQ())
                 q.dequeue()
 
@@ -82,7 +89,7 @@ def readAtom(q):
         characterList.append(first)
         q.dequeue()
     else:
-        raise Syntaxfel(first + "Är inte en stor bokstav")
+        raise Syntaxfel("Saknad stor bokstav vid radslutet " + q.remainderString())
 
     if not q.isEmpty():
         # Fall 2 - En STOR bokstav följs av en liten bokstav
