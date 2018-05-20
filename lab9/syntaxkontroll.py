@@ -29,8 +29,6 @@ def readMolecule(q):
         if (first == "("):
             parantes = True
             q.dequeue()
-            print("inne!")
-            q.printQueue()
             readGroup(q)
 
         # Fall 1 - Gruppslut
@@ -46,7 +44,7 @@ def readMolecule(q):
         else:
             readGroup(q)
 
-    if(q.isEmpty() == False):
+    if not q.isEmpty():
         if(q.currentQ() == ")" and parantes == False):
             raise Syntaxfel("Felaktig gruppstart vid radslutet " + q.remainderString())
     readMolecule(q)
