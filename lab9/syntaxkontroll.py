@@ -20,19 +20,18 @@ class Syntaxfel(Exception):
 
 # <mol> ::= <group> | <group><mol>
 def readMolecule(q):
+    parantes = False
     if q.isEmpty():
         return
     else:
         first = q.currentQ()
         # Fall 1 - Gruppstart
         if (first == "("):
-            parantes = True;
+            parantes = True
             q.dequeue()
             print("inne!")
             q.printQueue()
             readGroup(q)
-            if(q.currentQ() == ")"):
-                raise Syntaxfel("Felaktig gruppstart vid radslutet " + q.remainderString())
 
         # Fall 1 - Gruppslut
         elif(first == ")"):
@@ -46,6 +45,10 @@ def readMolecule(q):
                     raise Syntaxfel("Felaktig siffra i slutet av...")
         else:
             readGroup(q)
+
+    if(q.isEmpty() == False):
+        if(q.currentQ() == ")" and parantes == False):
+            raise Syntaxfel("Felaktig gruppstart vid radslutet " + q.remainderString())
     readMolecule(q)
 
 # <group> ::= <atom> | <atom><num> | (<mol>) <num>
@@ -67,8 +70,6 @@ def readGroup(q):
                 readNumber(q.currentQ())
                 q.dequeue()
 
-    print("efter read group")
-    q.printQueue()
     return
 
 
@@ -86,7 +87,6 @@ def readAtom(q):
         raise Syntaxfel(first + "Är inte en stor bokstav")
 
     if not q.isEmpty():
-        q.printQueue()
         # Fall 2 - En STOR bokstav följs av en liten bokstav
         if(readLowerCaseLetters(second)):
             q.dequeue()
@@ -95,8 +95,7 @@ def readAtom(q):
         # Undantagsfall:
         elif(q.currentQ().isdigit()):
             pass
-        elif(readCapitalLetters(q.currentQ())):
-            print(q.currentQ())            
+        elif(readCapitalLetters(q.currentQ())):           
             readAtom(q)
         elif(q.currentQ() == "(" or q.currentQ() == ")"):
             pass
