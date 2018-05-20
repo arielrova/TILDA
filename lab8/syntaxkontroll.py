@@ -59,12 +59,15 @@ def storeFormula(formel):
         if tecken.isdigit():
             numlist.append(tecken)
             num_node = ''.join(numlist)
+            q.enqueue(num_node)
+
         else:
             q.enqueue(tecken)
-    q.enqueue(num_node)
-
     return q
 
+# Formel är input från input-fältet.
+# q returneras från storeFormula
+# Om readMolecule - Syntaxen följs. Annars, raise exception.
 def kollaSyntax(formel):
     q = storeFormula(formel)
     try:

@@ -6,7 +6,7 @@ from syntaxkontroll import *
 class SyntaxTest(unittest.TestCase):
 
     def testMolecule(self):
-        """ Testar Molekylformeln"""
+        """ Testar Molekylformeln """
         self.assertEqual(kollaSyntax("Mm4"), "Följer syntaxen!")
 
     def testFelLitenBokstav(self):
