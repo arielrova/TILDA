@@ -1,4 +1,7 @@
 # Syntaxkontroll
+import sys
+
+sys.setrecursionlimit(2000)
 
 from linkedQFile import LinkedQ
 
@@ -26,43 +29,41 @@ def readMolecule(q):
         return
     else:
         first = q.currentQ()
-        print('rad 29 - first: '+first)
         # Fall 1 - Gruppstart
         if (first == "("):
             parantes = True
             q.dequeue()
-            print(parantes)
             readGroup(q)
 
         first = q.currentQ()
-        print(first + ' rad 38 ')
         # Fall 1 - Gruppslut
         if(first == ")"):
             if(parantes == True):
                 q.dequeue()
-                print('här')
             if(q.currentQ().isdigit()):
                 if(readNumber(q.currentQ())):
                     q.dequeue()
                     return readMolecule(q)
                 else:
                     raise Syntaxfel("Felaktig siffra i slutet av...")
-        else:
-            print(first)
-            print(str(parantes))
-            print('readGROUP')
+        elif first != '(':
             readGroup(q)
 
-    q.printQueue()
     if not q.isEmpty():
         if(first == ")" and parantes == False):
             if (readCapitalLetters(q.peek()) or readLowerCaseLetters(q.peek())):
                 raise Syntaxfel("Felaktig gruppstart vid radslutet " + q.remainderString())
         elif(first ==')'and parantes == True):
-            if (readCapitalLetters(q.peek()) or readLowerCaseLetters(q.peek())):
+            if(q.peek().isdigit()):
+                q.dequeue()
+                readNumber(q.currentQ())
+                q.dequeue()
+                parantes = False
+            else: #elif (readCapitalLetters(q.peek()) or readLowerCaseLetters(q.peek())):
                 raise Syntaxfel('Saknad siffra vid radslutet ' + q.remainderString())
     if (q.isEmpty() and parantes == True):
         raise Syntaxfel('Saknad högerparentes vid radslutet')
+
     readMolecule(q)
 
 # <group> ::= <atom> | <atom><num> | (<mol>) <num>
@@ -81,12 +82,13 @@ def readGroup(q):
             return
 
    # Fall 3 - Atom eller grupp med nummer efter
-    if(q.currentQ() == ")"):
-        if not q.isEmpty():
-            if(q.peek().isdigit()):
-                q.dequeue()
-                readNumber(q.currentQ())
-                q.dequeue()
+   #  if(q.currentQ() == ")"): # hantera i molecule!!
+   #      if not q.isEmpty():
+   #          if(q.peek().isdigit()):
+   #              q.dequeue()
+   #              readNumber(q.currentQ())
+   #              q.dequeue()
+
 
             #elif (readCapitalLetters(q.peek()) or readLowerCaseLetters(q.peek())):
             #    q.dequeue()
@@ -100,13 +102,9 @@ def readAtom(q):
     first = q.currentQ()
     second = q.peek()
 
-    print('rad 97 - first: '+first)
-    print('rad 98 - second: '+second)
-
     # Fall 1 - en STOR bokstav
     if (readCapitalLetters(first)):
         characterList.append(first)
-        print(str(characterList))
         q.dequeue()
     else:
         raise Syntaxfel("Saknad stor bokstav vid radslutet " + q.remainderString())
@@ -119,11 +117,18 @@ def readAtom(q):
 
         # Undantagsfall:
         elif(q.currentQ().isdigit()):
-            pass
+            #pass
+            numlist = list(q.currentQ())
+            if readNumber(numlist[0]):
+                pass
+            else:
+                q.dequeue()
+                raise Syntaxfel('För litet tal vid radslutet ' + q.remainderString())
         elif(readCapitalLetters(q.currentQ())):
             readAtom(q)
         elif(q.currentQ() == "(" or q.currentQ() == ")"):
             pass
+
 
     atom = ''.join(characterList)
     if not (isAtom(atom)):
@@ -149,7 +154,6 @@ def readNumber(number):
     if number >= 2:
         return number
 
-
 def storeFormula(formel):
     q = LinkedQ()
     numlist = []
@@ -163,6 +167,7 @@ def storeFormula(formel):
                 q.enqueue(num_node)
                 numlist = []
             q.enqueue(tecken)
+
 
     if numlist:
         num_node = ''.join(numlist)

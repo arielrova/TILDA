@@ -35,13 +35,13 @@ class SyntaxTest(unittest.TestCase):
         self.assertEqual(kollaSyntax("H2O)Fe"), "Felaktig gruppstart vid radslutet )Fe")
 
     def numberIsZero(self):
-        self.assertEqual(kollaSyntax("H0"), "För litet tal vid radslutet") #funkar inte
+        self.assertEqual(kollaSyntax("H0"), "För litet tal vid radslutet")
 
     def numberIsOne(self):
-        self.assertEqual(kollaSyntax("H1C"), "För litet tal vid radslutet C") #funkar inte
+        self.assertEqual(kollaSyntax("H1C"), "För litet tal vid radslutet C")
 
     def numberIsWeird(self):
-        self.assertEqual(kollaSyntax("H02C"), "För litet tal vid radslutet 2C") #funkar inte
+        self.assertEqual(kollaSyntax("H02C"), "För litet tal vid radslutet 2C") #dequear 2 för att den läser 02 som ett tal
 
     def capitalLetterIsMissing(self):
         self.assertEqual(kollaSyntax("Nacl"), "Saknad stor bokstav vid radslutet cl")
