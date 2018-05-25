@@ -41,8 +41,9 @@ def readLowerCaseLetters(letter): #<letter>::= a | b | c | ... | z
 
 def readNumber(number): #<num>::= 2 | 3 | 4 | ...
     number = int(number)
+    print(number)
     if number >=2:
-        return
+        return number
     raise Syntaxfel
 
 def printQueue(q):
@@ -58,11 +59,19 @@ def storeFormula(formel):
     for tecken in formel:
         if tecken.isdigit():
             numlist.append(tecken)
-            num_node = ''.join(numlist)
-            q.enqueue(num_node)
-
         else:
+            if numlist:
+                num_node = ''.join(numlist)
+                q.enqueue(num_node)
+                numlist = []
             q.enqueue(tecken)
+
+    if numlist:
+        num_node = ''.join(numlist)
+        q.enqueue(num_node)
+
+    print('1. '+str(numlist))
+    print('2. ' +(num_node))
     return q
 
 # Formel är input från input-fältet.

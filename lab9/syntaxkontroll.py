@@ -53,6 +53,8 @@ def readMolecule(q):
         if(first == ")" and parantes == False):
             if (readCapitalLetters(q.peek()) or readLowerCaseLetters(q.peek())):
                 raise Syntaxfel("Felaktig gruppstart vid radslutet " + q.remainderString())
+            else:
+                return
         elif(first ==')'and parantes == True):
             if(q.peek().isdigit()):
                 q.dequeue()
@@ -122,7 +124,6 @@ def readAtom(q):
             if readNumber(numlist[0]):
                 pass
             else:
-                q.dequeue()
                 raise Syntaxfel('För litet tal vid radslutet ' + q.remainderString())
         elif(readCapitalLetters(q.currentQ())):
             readAtom(q)
