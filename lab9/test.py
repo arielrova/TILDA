@@ -19,7 +19,7 @@ class SyntaxTest(unittest.TestCase):
 
     # En grupp
     def testGroup(self):
-        self.assertEqual(kollaSyntax("Si(C3(COOH)2)4(H2O)7"), "Formeln är syntaktiskt korrekt") #funkar inte
+        self.assertEqual(kollaSyntax("Si(C3(COOH)2)4(H2O)7"), "Formeln är syntaktiskt korrekt") #"Maximum recursion depth exceeded"
 
     # En enkel atom
     def unknownAtom(self):
