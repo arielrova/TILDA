@@ -26,17 +26,21 @@ def readMolecule(q):
         return
     else:
         first = q.currentQ()
+        print('rad 29 - first: '+first)
         # Fall 1 - Gruppstart
         if (first == "("):
             parantes = True
             q.dequeue()
+            print(parantes)
             readGroup(q)
 
-
+        first = q.currentQ()
+        print(first + ' rad 38 ')
         # Fall 1 - Gruppslut
         if(first == ")"):
             if(parantes == True):
                 q.dequeue()
+                print('här')
             if(q.currentQ().isdigit()):
                 if(readNumber(q.currentQ())):
                     q.dequeue()
@@ -51,8 +55,12 @@ def readMolecule(q):
 
     q.printQueue()
     if not q.isEmpty():
-        if(q.currentQ() == ")" and parantes == False):
-            raise Syntaxfel("Felaktig gruppstart vid radslutet " + q.remainderString())
+        if(first == ")" and parantes == False):
+            if (readCapitalLetters(q.peek()) or readLowerCaseLetters(q.peek())):
+                raise Syntaxfel("Felaktig gruppstart vid radslutet " + q.remainderString())
+        elif(first ==')'and parantes == True):
+            if (readCapitalLetters(q.peek()) or readLowerCaseLetters(q.peek())):
+                raise Syntaxfel('Saknad siffra vid radslutet ' + q.remainderString())
     if (q.isEmpty() and parantes == True):
         raise Syntaxfel('Saknad högerparentes vid radslutet')
     readMolecule(q)
@@ -75,13 +83,14 @@ def readGroup(q):
    # Fall 3 - Atom eller grupp med nummer efter
     if(q.currentQ() == ")"):
         if not q.isEmpty():
-            if(q.currentQ().isdigit()):
+            if(q.peek().isdigit()):
                 q.dequeue()
                 readNumber(q.currentQ())
                 q.dequeue()
 
-            if (readCapitalLetters(q.peek()) or readLowerCaseLetters(q.peek())):
-                raise Syntaxfel('Saknad siffra vid radslutet ' + q.remainderString())
+            #elif (readCapitalLetters(q.peek()) or readLowerCaseLetters(q.peek())):
+            #    q.dequeue()
+            #    raise Syntaxfel('Saknad siffra vid radslutet ' + q.remainderString())
     return
 
 
@@ -90,6 +99,9 @@ def readAtom(q):
     characterList = []
     first = q.currentQ()
     second = q.peek()
+
+    print('rad 97 - first: '+first)
+    print('rad 98 - second: '+second)
 
     # Fall 1 - en STOR bokstav
     if (readCapitalLetters(first)):

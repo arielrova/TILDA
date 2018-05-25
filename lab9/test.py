@@ -32,7 +32,7 @@ class SyntaxTest(unittest.TestCase):
         self.assertEqual(kollaSyntax("C(OH4C"), "Saknad högerparentes vid radslutet")
 
     def wrongGroupStart(self):
-        self.assertEqual(kollaSyntax("H2O)Fe"), "Felaktig gruppstart vid radslutet )Fe") #borde inte dequa )
+        self.assertEqual(kollaSyntax("H2O)Fe"), "Felaktig gruppstart vid radslutet )Fe")
 
     def numberIsZero(self):
         self.assertEqual(kollaSyntax("H0"), "För litet tal vid radslutet") #funkar inte
