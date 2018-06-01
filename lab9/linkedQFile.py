@@ -1,6 +1,3 @@
-import sys
-
-sys.setrecursionlimit(2000)
 
 class Node:
     def __init__(self, value, next = None):
@@ -49,7 +46,8 @@ class LinkedQ:
         if self.isEmpty():
             return None 
         elif not self.__first.next:
-            return self.__first.value
+            #return self.__first.value
+            return False
         else:
             nextnode = self.__first.next
             return nextnode.value
