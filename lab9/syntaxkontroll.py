@@ -1,6 +1,81 @@
 # Syntaxkontroll
 
-from linkedQFile import LinkedQ
+#from linkedQFile import LinkedQ
+
+from sys import stdin
+
+class Node:
+    def __init__(self, value, next = None):
+        self.value = value
+        self.next = next
+
+    def __str__(self):
+        s = str(self.value)
+        return s
+
+class LinkedQ:
+
+    def __init__(self):
+        self.__first = None
+        self.__last = None
+
+    def enqueue(self, item):
+        newnode = Node(item)
+        if self.isEmpty():
+            self.__first = self.__last = newnode
+        else:
+            self.__last.next = newnode
+            self.__last = newnode
+        return newnode
+
+    def dequeue(self):                  #syfte: ta bort och returnera det första nod-värdet i kön
+        if self.isEmpty():              #om listan är tom, då e den tom
+            return None
+        else:
+            value = self.__first.value                  #det vi vill ta bort och returnera
+            secondNode = self.__first.next              #vill veta vad vi sätter till nytt value = second
+            if secondNode is None:                      #om det bara finns en nod i ledet
+                self.__first = self.__last = None           #då blir det en tom kö
+            else:
+                self.__first = secondNode               #annars blir det nya
+            return value
+
+    def isEmpty(self):
+       if self.__first is None:
+            return True
+
+    def currentQ(self):
+        return self.__first.value
+
+    def peek(self):
+        if self.isEmpty():
+            return None
+        elif not self.__first.next:
+            #return self.__first.value
+            return False
+        else:
+            nextnode = self.__first.next
+            return nextnode.value
+
+    def printQueue(self):
+        nextNode = self.__first
+        while(nextNode != None):
+            print(nextNode.value)
+            nextNode = nextNode.next
+            if nextNode == None:
+                print("\n" + "\n")
+
+    def remainderString(self):
+        remainderList = []
+        nextNode = self.__first
+        while(nextNode != None):
+            remainderList.append(nextNode.value)
+            nextNode = nextNode.next
+
+        return ''.join(remainderList)
+
+
+
 
 atoms = ["H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne", "Na", "Mg",
             "Al", "Si", "P", "S", "Cl", "Ar", "K", "Ca", "Sc", "Ti", "V", "Cr",
@@ -37,7 +112,7 @@ def readMol(q):
             # kollar första så att slutparentes får inte följas av bokstav
             if readCapitalLetters(q.peek()) or readLowerCaseLetters(q.peek()):
                 q.dequeue()
-                raise Syntaxfel('Saknad siffra vid radslutet ' + q.remainderString())
+                raise Syntaxfel('Saknad siffra vid radslutet ')
 
             # fortsätter efter med att kolla antal paranteser som matchar
             if len(stack) == 0:
@@ -51,7 +126,7 @@ def readMol(q):
                 if n == m: # om matchade antal - move on
                     pass
                 else:
-                    raise Syntaxfel('Felaktig gruppstart vid radslutet ' + q.remainderString())
+                    raise Syntaxfel('Felaktig gruppstart vid radslutet ')
 
             # kolla om parantes-slut följs av siffra
             if q.peek().isdigit():
@@ -61,7 +136,7 @@ def readMol(q):
                     pass
             pass
         else:
-            raise Syntaxfel('Felaktig gruppstart vid radslutet ' + q.remainderString())
+            raise Syntaxfel('Felaktig gruppstart vid radslutet ')
 
     # om parenteser inte har slutats
     elif len(stack) != 0:
@@ -74,7 +149,7 @@ def readMol(q):
             pass
         else:
             q.dequeue() #för att stämma med kattis
-            raise Syntaxfel('Saknad högerparentes vid radslutet '+ q.remainderString())
+            raise Syntaxfel('Saknad högerparentes vid radslutet ')
     else:
         readGroup(q)
 
@@ -93,7 +168,7 @@ def readGroup(q):  # <group> ::= <atom> | <atom><num> | (<mol>) <num>
     else:
         #om atom börjar med siffra
         if q.currentQ().isdigit():
-            raise Syntaxfel('Felaktig gruppstart vid radslutet ' + q.remainderString())
+            raise Syntaxfel('Felaktig gruppstart vid radslutet ')
         else:
             readAtom(q)
 
@@ -122,7 +197,7 @@ def readGroup(q):  # <group> ::= <atom> | <atom><num> | (<mol>) <num>
         if num[0] == '0':
             q.dequeue() #för att stämma med kattis
             rest = ''.join(num[1:])
-            raise Syntaxfel('För litet tal vid radslutet ' + rest + q.remainderString()) #för att stämma med kattis
+            raise Syntaxfel('För litet tal vid radslutet ' + rest) #för att stämma med kattis
         elif num[0] == '1':
             if len(num) > 1:
                 numlist.append(num[0])
@@ -131,7 +206,7 @@ def readGroup(q):  # <group> ::= <atom> | <atom><num> | (<mol>) <num>
                 readNumber(int(number))      #dubbelkoll av siffra
             else:
                 q.dequeue() #för att stämma med kattis
-                raise Syntaxfel('För litet tal vid radslutet ' + q.remainderString())
+                raise Syntaxfel('För litet tal vid radslutet ')
         else:
             readNumber(q.currentQ())
             q.dequeue()
@@ -153,7 +228,7 @@ def readAtom(q):
         characterList.append(first)
         q.dequeue()
     else:
-        raise Syntaxfel("Saknad stor bokstav vid radslutet " + q.remainderString())
+        raise Syntaxfel("Saknad stor bokstav vid radslutet ")
 
     # Fall 2: En STOR bokstav följs av en liten bokstav
     if not q.isEmpty():
@@ -178,7 +253,7 @@ def readAtom(q):
 
     atom = ''.join(characterList)
     if not (isAtom(atom)):
-        raise Syntaxfel("Okänd atom vid radslutet " + q.remainderString())
+        raise Syntaxfel("Okänd atom vid radslutet ")
     return
 
 
@@ -234,13 +309,20 @@ def kollaSyntax(formel):
         readMol(q)
         return "Formeln är syntaktiskt korrekt"
     except Syntaxfel as fel:
-        return str(fel)
+        return str(fel) + q.remainderString() 
 
 
 def main():
-    formel = input("Skriv en formel: ")
+    stdin = open("incorrect_sample.in")
+    rader = stdin.readlines()
+    formler = [rad.strip() for rad in rader if rad != '#\n']
+
+    for f in formler:
+        print(kollaSyntax(f))
+
+    '''formel = input("Skriv en formel: ")
     resultat = kollaSyntax(formel)
-    print(resultat)
+    print(resultat)'''
 
 if __name__ == "__main__":
     main()
