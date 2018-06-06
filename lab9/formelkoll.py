@@ -50,6 +50,14 @@ class LinkedQ:
     def currentQ(self):
         return self.__first.value
 
+    def printQueue(self):
+        nextNode = self.__first
+        while(nextNode != None):
+            print(nextNode.value)
+            nextNode = nextNode.next
+            if nextNode == None:
+                print("\n" + "\n")
+
     def remainderString(self):
         remainderList = []
         nextNode = self.__first
@@ -92,15 +100,16 @@ def readMolecule(q): #<molekyl> ::= <atom> | <atom><num>    #två vägar:
     if q.isEmpty():   # om tom efter tidigare tester, return
         return
 
-    if q.currentQ() == ('('):
+
+    if q.currentQ() == '(':
         q.dequeue()
         readGroup(q)
-    elif q.currentQ() in uppercase:
+    elif q.currentQ().isupper():
         readAtom(q)
-    elif q.currentQ() in lowercase:
-        raise Syntaxfel('Saknad stor bokstav vid radslutet ')
+    elif q.currentQ().islower():
+        raise Syntaxfel('Saknad stor bokstav vid radslutet')
     else:
-        raise Syntaxfel('Felaktig gruppstart vid radslutet ')
+        raise Syntaxfel('Felaktig gruppstart vid radslutet')
 
     #Borde komma hit om atom-koll har avslutats eller stött på en slutparantes
 
@@ -120,17 +129,24 @@ def readGroup(q): #Gå tillbaka till readMol för att kolla atomsyntax av grupp 
     readMolecule(q)
 
     if q.isEmpty():
-        raise Syntaxfel('Saknad högerparantes vid radslutet')
-    if q.currentQ() == ')':
-        q.dequeue()
-        if q.currentQ():
-            if q.currentQ() in uppercase:
-                raise Syntaxfel('Saknad siffra vid radslutet ')
-            elif q.currentQ() in numbers:
-                readNumber(q)
+        raise Syntaxfel('Saknad högerparentes vid radslutet')
 
+    if q.currentQ() == ')' and q.peek() in numbers:
+        readNumber(q)
+        q.dequeue()
     else:
-        raise Syntaxfel('Saknad högerparantes vid radslutet ')
+        q.dequeue()
+        raise Syntaxfel('Saknad siffra vid radslutet')
+
+    if not q.isEmpty():
+        if q.currentQ().isupper():
+            q.dequeue()
+            raise Syntaxfel('Saknad siffra vid radslutet')
+        elif q.currentQ() in numbers:
+            readNumber(q)
+
+    # else:
+    #     raise Syntaxfel('Saknad högerparantes vid radslutet ')
 
     return
 
@@ -142,7 +158,7 @@ def readAtom(q): # <atom>  ::= <LETTER> | <LETTER><letter>
     if letter in uppercase:
         q.dequeue()
     else:
-        raise Syntaxfel('Saknad stor bokstav vid radslutet ')
+        raise Syntaxfel('Saknad stor bokstav vid radslutet')
 
     if q.isEmpty():     #kolla om tom, annars försöker programmet läsa NoneType-objects och ger errors
         return
@@ -153,12 +169,12 @@ def readAtom(q): # <atom>  ::= <LETTER> | <LETTER><letter>
         if atom in atoms:
             pass
         else:
-            raise Syntaxfel('Okänd atom vid radslutet ')
+            raise Syntaxfel('Okänd atom vid radslutet')
     else:
         if letter in atoms:
             pass
         else:
-            raise Syntaxfel('Okänd atom vid radslutet ')
+            raise Syntaxfel('Okänd atom vid radslutet')
 
     if q.isEmpty():     #koll om tom igen efter föregående koll
         return
@@ -180,7 +196,7 @@ def readNumber(q): #<num>::= 2 | 3 | 4 | ...
 
         if first == '0' or first == '1' and q.peek() not in numbers:
             q.dequeue()
-            raise Syntaxfel('För litet tal vid radslutet ')
+            raise Syntaxfel('För litet tal vid radslutet')
         else:
             while q.currentQ() in numbers:
                 q.dequeue()
@@ -211,14 +227,16 @@ def kollaSyntax(formel):
         readFormula(q)
         return "Formeln är syntaktiskt korrekt"
     except Syntaxfel as fel:
-        return str(fel) + q.remainderString()
+        if q.remainderString():
+            return str(fel) + " " + q.remainderString()
+        else:
+            return str(fel)
 
 def main():
-    stdin = open('correct_sample.in')
-    for i in stdin:
-        line = i.split()
-        if (line[0] != '#'):
-            resultat = kollaSyntax(line[0])
+    for line in stdin:
+        line = line.rstrip('\n')
+        if (line != '#'):
+            resultat = kollaSyntax(line)
             print(resultat)
         else:
             break
@@ -231,7 +249,6 @@ def main():
         print(kollaSyntax(f))
 
 
-    
     formel = input("Skriv en formel: ")
     resultat = kollaSyntax(formel)
     print(resultat)
@@ -239,4 +256,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
