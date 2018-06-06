@@ -1,5 +1,4 @@
 # Syntaxkontroll
-#from linkedQFile import LinkedQ
 from sys import *
 
 class Node:
@@ -49,6 +48,7 @@ class LinkedQ:
 
     def currentQ(self):
         return self.__first.value
+
 
     def printQueue(self):
         nextNode = self.__first
@@ -100,13 +100,12 @@ def readMolecule(q): #<molekyl> ::= <atom> | <atom><num>    #två vägar:
     if q.isEmpty():   # om tom efter tidigare tester, return
         return
 
-
     if q.currentQ() == '(':
         q.dequeue()
         readGroup(q)
-    elif q.currentQ().isupper():
+    elif q.currentQ() in uppercase:
         readAtom(q)
-    elif q.currentQ().islower():
+    elif q.currentQ() in lowercase:
         raise Syntaxfel('Saknad stor bokstav vid radslutet')
     else:
         raise Syntaxfel('Felaktig gruppstart vid radslutet')
@@ -139,39 +138,40 @@ def readGroup(q): #Gå tillbaka till readMol för att kolla atomsyntax av grupp 
         raise Syntaxfel('Saknad siffra vid radslutet')
 
     if not q.isEmpty():
-        if q.currentQ().isupper():
+        if q.currentQ() in uppercase:
             q.dequeue()
             raise Syntaxfel('Saknad siffra vid radslutet')
         elif q.currentQ() in numbers:
             readNumber(q)
-
-    # else:
-    #     raise Syntaxfel('Saknad högerparantes vid radslutet ')
 
     return
 
 
 def readAtom(q): # <atom>  ::= <LETTER> | <LETTER><letter>
     #Här borde atom kollas igenom om den har rätt syntax OCH finns i listan av atomer
-    letter = q.currentQ()
+    upper = q.currentQ()
 
-    if letter in uppercase:
+    if upper in uppercase:
         q.dequeue()
     else:
         raise Syntaxfel('Saknad stor bokstav vid radslutet')
 
-    if q.isEmpty():     #kolla om tom, annars försöker programmet läsa NoneType-objects och ger errors
-        return
 
-    if q.currentQ() in lowercase:
+    if q.isEmpty():         #kolla om tom, annars försöker programmet läsa NoneType-objects och ger errors
+        if upper in atoms:  #eftersom vi dequat innan måste vi också att upper är en 1-bokstavig godkänd atom
+            return
+        else:
+            raise Syntaxfel('Okänd atom vid radslutet')
+
+    if q.currentQ() in lowercase: #kolla 2-bokstavig godkänd atom
         lower = q.dequeue()
-        atom = letter+lower
+        atom = upper+lower
         if atom in atoms:
             pass
         else:
             raise Syntaxfel('Okänd atom vid radslutet')
     else:
-        if letter in atoms:
+        if upper in atoms: #men om kön inte är tom, kollar vi här om upper är en 1-bokstavig godkänd atom
             pass
         else:
             raise Syntaxfel('Okänd atom vid radslutet')
@@ -233,6 +233,8 @@ def kollaSyntax(formel):
             return str(fel)
 
 def main():
+    #stdin = open("test.in")
+
     for line in stdin:
         line = line.rstrip('\n')
         if (line != '#'):
@@ -240,19 +242,7 @@ def main():
             print(resultat)
         else:
             break
-    '''
-    stdin = open("correct_sample.in")
-    rader = stdin.readlines()
-    formler = [rad.strip() for rad in rader if rad != '#\n']
 
-    for f in formler:
-        print(kollaSyntax(f))
-
-
-    formel = input("Skriv en formel: ")
-    resultat = kollaSyntax(formel)
-    print(resultat)
-    '''
 
 if __name__ == "__main__":
     main()
