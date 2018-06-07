@@ -2,6 +2,7 @@
 from sys import *
 from linkedQFile import LinkedQ
 from molgrafik import Molgrafik, Ruta
+from pprint import pprint
 
 uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 lowercase = 'abcdefghijklmnopqrstuvwxyz'
@@ -26,21 +27,25 @@ def readFormula(q):                                             #om tom, ge synt
         raise Syntaxfel('Felaktig gruppstart vid radslutet')
 
     while not q.isEmpty():
-        readMolecule(q)
+        mol = readMolecule(q)
 
-    return
+    return mol
 
 def readMolecule(q): #<molekyl> ::= <atom> | <atom><num>    #två vägar:
                                                             # - läsa grupp(molekyl inom parentes - deqeue parantes, kalla readmol)
                                                             # - läsa enbart molekyl(inga parenteser, kalla readatom för koll av rätt atomstruktur)
+   
+    # --- ARIEL --- # Skapar en rot-ruta, alla andra rutor hänger på den här genom next.
+    ruta = Ruta()
     if q.isEmpty():   # om tom efter tidigare tester, return
-        return
+        return ruta
 
     if q.currentQ() == '(':
         q.dequeue()
-        readGroup(q)
+        readGroup(q, ruta)
     elif q.currentQ() in uppercase:
-        readAtom(q)
+        # --- ARIEL --- # Skriver över den tomma rutan med return från readAtom
+        ruta = readAtom(q, ruta)
     elif q.currentQ() in lowercase:
         raise Syntaxfel('Saknad stor bokstav vid radslutet')
     else:
@@ -49,7 +54,9 @@ def readMolecule(q): #<molekyl> ::= <atom> | <atom><num>    #två vägar:
     #Borde komma hit om atom-koll har avslutats eller stött på en slutparantes
 
     if q.isEmpty():
-        return
+
+        # --- ARIEL --- # Skickar tillbaka rot-rutan
+        return ruta
     elif q.currentQ() != ')': #om kön inte har tömts, gör rekursion av readMol
         readMolecule(q)
 
@@ -57,18 +64,17 @@ def readMolecule(q): #<molekyl> ::= <atom> | <atom><num>    #två vägar:
 
 
 def readGroup(q): #Gå tillbaka till readMol för att kolla atomsyntax av grupp inom parantes
-    ruta = Ruta()
 
     if q.isEmpty(): #kan vara tom eftersom condition för att påbörja readGroup är att kön har börjat med en öppningsparantes
         return
 
-    ruta.down = readMolecule(q)
+    readMolecule(q)
 
     if q.isEmpty():
         raise Syntaxfel('Saknad högerparentes vid radslutet')
 
     if q.currentQ() == ')' and q.peek() in numbers:
-        ruta.num = readNumber(q)
+        readNumber(q)
         q.dequeue()
     else:
         q.dequeue()
@@ -79,12 +85,12 @@ def readGroup(q): #Gå tillbaka till readMol för att kolla atomsyntax av grupp 
             q.dequeue()
             raise Syntaxfel('Saknad siffra vid radslutet')
         elif q.currentQ() in numbers:
-            ruta.num = readNumber(q)
+            readNumber(q)
 
     return
 
 
-def readAtom(q): # <atom>  ::= <LETTER> | <LETTER><letter>
+def readAtom(q, ruta): # <atom>  ::= <LETTER> | <LETTER><letter>
     #Här borde atom kollas igenom om den har rätt syntax OCH finns i listan av atomer
     upper = q.currentQ()
 
@@ -104,7 +110,15 @@ def readAtom(q): # <atom>  ::= <LETTER> | <LETTER><letter>
         lower = q.dequeue()
         atom = upper+lower
         if atom in atoms:
-            pass
+            # --- ARIEL --- # Om första noden redan innehåller atom,
+            # --- ARIEL --- # skapa en ny nod, i båda fallen lägg till atomen.
+            if(ruta.atom == "()"):
+                ruta.atom = atom
+                print(ruta.atom)
+            else:
+                nyruta = Ruta()
+                nyruta.atom = atom
+                ruta.next = nyruta
         else:
             raise Syntaxfel('Okänd atom vid radslutet')
     else:
@@ -114,13 +128,19 @@ def readAtom(q): # <atom>  ::= <LETTER> | <LETTER><letter>
             raise Syntaxfel('Okänd atom vid radslutet')
 
     if q.isEmpty():     #koll om tom igen efter föregående koll
-        return
+        return ruta
     elif q.currentQ() in numbers:
-        readNumber(q)
+        ruta.num = int(readNumber(q))
     elif q.currentQ() in uppercase:
-        readAtom(q)
+        readAtom(q, ruta)
 
-    return
+    # --- ARIEL --- # För kontroll - skriver ut atom och nummer för första noden och andra 
+    print(ruta.atom)
+    print(ruta.num)
+    if(ruta.next):
+        print(ruta.next.atom)
+        print(ruta.next.num)
+    return ruta
 
 
 
@@ -142,7 +162,6 @@ def readNumber(q): #<num>::= 2 | 3 | 4 | ...
                 # men om tom, kommer den ge error pga den försöker läsa none-type object
                 if q.isEmpty():
                     break
-
     return tal
 
 def printQueue(q):
@@ -162,8 +181,9 @@ def storeFormula(formel):
 def kollaSyntax(formel):
     q = storeFormula(formel)
     try:
-        readFormula(q)
-        return "Formeln är syntaktiskt korrekt"
+        grafik = readFormula(q)
+        # return "Formeln är syntaktiskt korrekt"
+        return grafik
     except Syntaxfel as fel:
         if q.remainderString():
             return str(fel) + " " + q.remainderString()
@@ -171,22 +191,17 @@ def kollaSyntax(formel):
             return str(fel)
 
 def main():
-    mg = Molgrafik()
 
     while True:
+        # --- ARIEL --- # Molgrafik innehåller allt som behövs för att rita trädet
+        # --- ARIEL --- # Vi behöver inte tänka särskilt på det.
+        mg = Molgrafik()
         formel = input("Skriv in en formel ")
         resultat = kollaSyntax(formel)
-        print(resultat)
-        # mg.show(resultat)
+        # print(resultat)
 
-
-    # for line in stdin:
-    #     line = line.rstrip('\n')
-    #     if (line != '#'):
-    #         resultat = kollaSyntax(line)
-    #         print(resultat)
-    #     else:
-    #         break
+        # --- ARIEL --- # Det händer bara      
+        mg.show(resultat)
 
 
 if __name__ == "__main__":
