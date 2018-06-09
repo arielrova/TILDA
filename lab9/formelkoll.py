@@ -94,55 +94,54 @@ def readFormula(q):                                             #om tom, ge synt
 
     return
 
-def readMolecule(q): #<molekyl> ::= <atom> | <atom><num>    #två vägar:
-                                                            # - läsa grupp(molekyl inom parentes - deqeue parantes, kalla readmol)
-                                                            # - läsa enbart molekyl(inga parenteser, kalla readatom för koll av rätt atomstruktur)
+# <mol>   ::= <group> | <group><mol>
+def readMolecule(q):  
     if q.isEmpty():   # om tom efter tidigare tester, return
         return
-
-    if q.currentQ() == '(':
-        q.dequeue()
-        readGroup(q)
-    elif q.currentQ() in uppercase:
-        readAtom(q)
-    elif q.currentQ() in lowercase:
-        raise Syntaxfel('Saknad stor bokstav vid radslutet')
     else:
-        raise Syntaxfel('Felaktig gruppstart vid radslutet')
-
-    #Borde komma hit om atom-koll har avslutats eller stött på en slutparantes
-
-    if q.isEmpty():
-        return
-    elif q.currentQ() != ')': #om kön inte har tömts, gör rekursion av readMol
-        readMolecule(q)
-
+        readGroup(q)
+        if not q.isEmpty():
+            if q.currentQ() == ')' and q.peek() in numbers:
+                readNumber(q)
+                q.dequeue()
+            elif q.currentQ() in uppercase or q.currentQ() in lowercase:
+                q.dequeue()
+                raise Syntaxfel('Saknad siffra vid radslutet')
     return
 
 
+        # raise Syntaxfel('Felaktig gruppstart vid radslutet')
+
+# <group> ::= <atom> |<atom><num> | (<mol>) <num>
 def readGroup(q): #Gå tillbaka till readMol för att kolla atomsyntax av grupp inom parantes
+
+    if q.currentQ() in uppercase:
+        readAtom(q)
+        if not q.isEmpty() and q.currentQ() is not ')':
+            readGroup(q)
+    elif q.currentQ() in lowercase:
+        raise Syntaxfel('Saknad stor bokstav vid radslutet')
 
     if q.isEmpty(): #kan vara tom eftersom condition för att påbörja readGroup är att kön har börjat med en öppningsparantes
         return
 
-    readMolecule(q)
+    if q.currentQ() == '(':
+        q.dequeue()
+        readMolecule(q)
+
+    q.printQueue()
 
     if q.isEmpty():
         raise Syntaxfel('Saknad högerparentes vid radslutet')
-
-    if q.currentQ() == ')' and q.peek() in numbers:
-        readNumber(q)
-        q.dequeue()
     else:
-        q.dequeue()
-        raise Syntaxfel('Saknad siffra vid radslutet')
-
-    if not q.isEmpty():
         if q.currentQ() in uppercase:
             q.dequeue()
             raise Syntaxfel('Saknad siffra vid radslutet')
         elif q.currentQ() in numbers:
             readNumber(q)
+        else:
+            return
+            # raise Syntaxfel('Felaktig gruppstart vid radslutet')
 
     return
 
@@ -233,7 +232,6 @@ def kollaSyntax(formel):
             return str(fel)
 
 def main():
-    #stdin = open("test.in")
 
     for line in stdin:
         line = line.rstrip('\n')
