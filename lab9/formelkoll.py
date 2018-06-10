@@ -94,56 +94,41 @@ def readFormula(q):                                             #om tom, ge synt
 
     return
 
-# <mol>   ::= <group> | <group><mol>
-def readMolecule(q):  
-    if q.isEmpty():   # om tom efter tidigare tester, return
-        return
-    else:
-        readGroup(q)
-        if not q.isEmpty():
-            if q.currentQ() == ')' and q.peek() in numbers:
-                readNumber(q)
-                q.dequeue()
-            elif q.currentQ() in uppercase or q.currentQ() in lowercase:
-                q.dequeue()
-                raise Syntaxfel('Saknad siffra vid radslutet')
-    return
+def readMolecule(q):
+    readGroup(q)
 
-
-        # raise Syntaxfel('Felaktig gruppstart vid radslutet')
-
-# <group> ::= <atom> |<atom><num> | (<mol>) <num>
-def readGroup(q): #Gå tillbaka till readMol för att kolla atomsyntax av grupp inom parantes
-
-    if q.currentQ() in uppercase:
-        readAtom(q)
-        if not q.isEmpty() and q.currentQ() is not ')':
-            readGroup(q)
-    elif q.currentQ() in lowercase:
-        raise Syntaxfel('Saknad stor bokstav vid radslutet')
-
-    if q.isEmpty(): #kan vara tom eftersom condition för att påbörja readGroup är att kön har börjat med en öppningsparantes
-        return
-
-    if q.currentQ() == '(':
-        q.dequeue()
+    if not q.isEmpty() and q.currentQ() is not ')':
         readMolecule(q)
 
-    q.printQueue()
+    return
 
-    if q.isEmpty():
-        raise Syntaxfel('Saknad högerparentes vid radslutet')
-    else:
-        if q.currentQ() in uppercase:
+
+
+def readGroup(q):
+    if not q.isEmpty() and q.currentQ() in uppercase:
+        readAtom(q)
+
+    elif q.currentQ() is '(':
+        q.dequeue()
+        readMolecule(q)
+        if not q.isEmpty() and q.currentQ() is ')':
             q.dequeue()
-            raise Syntaxfel('Saknad siffra vid radslutet')
-        elif q.currentQ() in numbers:
+        else:
+            raise Syntaxfel("Saknad högerparantes vid radslutet")
+        if not q.isEmpty() and q.currentQ().isdigit():
             readNumber(q)
         else:
-            return
-            # raise Syntaxfel('Felaktig gruppstart vid radslutet')
+            raise Syntaxfel("Saknad siffra vid radslutet")
 
-    return
+    else:
+        if q.currentQ() is ')' or q.currentQ() in numbers:
+            raise Syntaxfel("Felaktig gruppstart vid radslutet")
+        elif q.currentQ() in lowercase:
+            raise Syntaxfel("Saknad stor bokstav vid radslutet")
+        else:
+            return
+
+
 
 
 def readAtom(q): # <atom>  ::= <LETTER> | <LETTER><letter>
@@ -177,10 +162,12 @@ def readAtom(q): # <atom>  ::= <LETTER> | <LETTER><letter>
 
     if q.isEmpty():     #koll om tom igen efter föregående koll
         return
-    elif q.currentQ() in numbers:
-        readNumber(q)
-    elif q.currentQ() in uppercase:
-        readAtom(q)
+    else:
+        if q.currentQ() in numbers:
+            readNumber(q)
+        if not q.isEmpty():
+            if q.currentQ() in uppercase:
+                readAtom(q)
 
     return
 
@@ -189,7 +176,7 @@ def readAtom(q): # <atom>  ::= <LETTER> | <LETTER><letter>
 def readNumber(q): #<num>::= 2 | 3 | 4 | ...
     if q.isEmpty():
         return
-
+        
     if q.currentQ():
         first = q.currentQ()
 
