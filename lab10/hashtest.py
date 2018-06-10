@@ -1,5 +1,5 @@
 #Testar klassen Hashtabell i filen hashfil.py
-from Hash import HashTable
+from ownHash import HashTable
 
 class Atom:
 
@@ -129,7 +129,6 @@ Rg 280;\
 Ds 281;\
 Cn 285"
     atomlista = data.split(";")
-    print(len(atomlista))
     return atomlista
 
 def lagraHashtabell(atomlista):
@@ -137,12 +136,11 @@ def lagraHashtabell(atomlista):
     print("\n-------------------------------------------------------")
     print(" * Lagrar listans atomer i hashtabell...")
     antalElement = len(atomlista)
-    print(antalElement)
     hashtabell = HashTable(antalElement)
     for element in atomlista:
         namn, vikt = element.split()
         nyAtom = Atom(namn, float(vikt))
-        hashtabell.set(namn, nyAtom)
+        hashtabell.put(namn, nyAtom)
     return hashtabell
 
 def allaAtomerFinns(hashtabell, atomlista):
@@ -156,12 +154,12 @@ def allaAtomerFinns(hashtabell, atomlista):
         vikt = float(vikt)
         try:
             hashadAtom = hashtabell.get(namn)
-            if hashadAtom.vikt != vikt:
+            if hashadAtom.value.vikt != vikt:
                 print(namn, "har fel vikt.")
             else:
                 antal += 1
         except KeyError:
-            print(namn, "fanns inte med i hashtabellen.") #när det har skett krockar i hashningen
+            print(namn, "fanns inte med i hashtabellen.")
             OK = False
     print( antal, "element hashades korrekt.")
     return OK
@@ -181,6 +179,5 @@ def knasAtomFinnsInte(hashtabell):
 
 atomlista = skapaAtomlista()
 hashtabell = lagraHashtabell(atomlista)
-
 allaAtomerFinns(hashtabell, atomlista)
 knasAtomFinnsInte(hashtabell)

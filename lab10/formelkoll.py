@@ -1,7 +1,7 @@
 from linkedQFile import LinkedQ
 from molgrafik import *
-from pprint import *
 from hashtest import hashtabell
+
 
 
 uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -158,7 +158,6 @@ def kollaSyntax(formel):
 def calcWeight(tree):
      #hashtabellens uppbyggnad har atomnamn som 'key'
      #varje key har ett objekt med attributen namn och vikt
-    #print(hashtabell.get('Si'))
 
     if tree:       # kolla om true för varje rekursion
         if tree.down: # om formel har molekylgrupper inom parenteser
@@ -166,7 +165,7 @@ def calcWeight(tree):
             return grupp_vikt + float(calcWeight(tree.next))
         else:
             atom_obj = hashtabell.get(tree.atom)
-            vikt = float(atom_obj.vikt) * float(tree.num)
+            vikt = float(atom_obj.value.vikt) * float(tree.num)
             return vikt + float(calcWeight(tree.next))
 
     return 0
@@ -178,7 +177,7 @@ def main():
         tree = kollaSyntax(formel)
         weight = calcWeight(tree)
         mg.show(tree)
-        print(weight)
+        print('Total vikt: ' + str(weight))
 
 
 if __name__ == "__main__":
