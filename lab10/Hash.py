@@ -12,6 +12,7 @@ class HashTable():
     def set(self, key, data):#för att sätta in någonting i hashtabellen
         NewNode = HashNode(key,data)
         index = self.hash_funct(key)
+        print(index)
         node = self.hashlist[index]
 
         if node == None:
@@ -36,7 +37,7 @@ class HashTable():
             result = result * 32 + ord(c)
         return result%self.sizeOfHashTable
 
-
+'''
 with open("unique_tracks.txt", "r", encoding="utf-8") as tracklist:
     hashtable = HashTable(100000)
     for line in tracklist:
@@ -45,3 +46,4 @@ with open("unique_tracks.txt", "r", encoding="utf-8") as tracklist:
         hashtable.set(line_lists[2], (line_lists[0],line_lists[1], line_lists[3]))
 
 print(hashtable.get('Jully'))
+'''

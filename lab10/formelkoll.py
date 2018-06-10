@@ -1,7 +1,7 @@
 from linkedQFile import LinkedQ
 from molgrafik import *
-from pprint import * 
-from hashtest import *
+from pprint import *
+from hashtest import hashtabell
 
 
 uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
@@ -68,8 +68,6 @@ def readGroup(q, ruta = Ruta()):
     return ruta
 
 
-
-
 def readAtom(q): # <atom>  ::= <LETTER> | <LETTER><letter>
     #Här borde atom kollas igenom om den har rätt syntax OCH finns i listan av atomer
     ruta = Ruta()
@@ -110,7 +108,6 @@ def readAtom(q): # <atom>  ::= <LETTER> | <LETTER><letter>
             if q.currentQ() in uppercase:
                 ruta.next = readAtom(q)
     return ruta
-
 
 
 def readNumber(q): #<num>::= 2 | 3 | 4 | ...
@@ -157,6 +154,22 @@ def kollaSyntax(formel):
             return str(fel) + " " + q.remainderString()
         else:
             return str(fel)
+
+def calcWeight(tree):
+     #hashtabellens uppbyggnad har atomnamn som 'key'
+     #varje key har ett objekt med attributen namn och vikt
+    #print(hashtabell.get('Si'))
+
+    if tree:       # kolla om true för varje rekursion
+        if tree.down: # om formel har molekylgrupper inom parenteser
+            grupp_vikt = float(calcWeight(tree.down))*float(tree.num)
+            return grupp_vikt + float(calcWeight(tree.next))
+        else:
+            atom_obj = hashtabell.get(tree.atom)
+            vikt = float(atom_obj.vikt) * float(tree.num)
+            return vikt + float(calcWeight(tree.next))
+
+    return 0
 
 def main():
     while True:

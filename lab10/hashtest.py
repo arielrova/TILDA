@@ -129,6 +129,7 @@ Rg 280;\
 Ds 281;\
 Cn 285"
     atomlista = data.split(";")
+    print(len(atomlista))
     return atomlista
 
 def lagraHashtabell(atomlista):
@@ -136,6 +137,7 @@ def lagraHashtabell(atomlista):
     print("\n-------------------------------------------------------")
     print(" * Lagrar listans atomer i hashtabell...")
     antalElement = len(atomlista)
+    print(antalElement)
     hashtabell = HashTable(antalElement)
     for element in atomlista:
         namn, vikt = element.split()
@@ -159,7 +161,7 @@ def allaAtomerFinns(hashtabell, atomlista):
             else:
                 antal += 1
         except KeyError:
-            print(namn, "fanns inte med i hashtabellen.")
+            print(namn, "fanns inte med i hashtabellen.") #när det har skett krockar i hashningen
             OK = False
     print( antal, "element hashades korrekt.")
     return OK
@@ -179,5 +181,6 @@ def knasAtomFinnsInte(hashtabell):
 
 atomlista = skapaAtomlista()
 hashtabell = lagraHashtabell(atomlista)
-allaAtomerFinns(hashtabell, atomlista)    
+
+allaAtomerFinns(hashtabell, atomlista)
 knasAtomFinnsInte(hashtabell)
